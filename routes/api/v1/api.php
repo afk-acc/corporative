@@ -6,10 +6,21 @@ use \App\Http\Controllers\api\v1\RoleController;
 use \App\Http\Controllers\api\v1\PermissionController;
 use \App\Http\Controllers\api\v1\TaskController;
 use \App\Http\Controllers\api\v1\FileSystem;
+use \App\Http\Controllers\api\v1\ChatController;
 Route::post('/auth/login', [LoginController::class, 'login']);
 Route::post('/auth/register', [LoginController::class, 'register']);
+;
+//Route::get('/chat', function (\Illuminate\Http\Request $request){
+//    \Illuminate\Support\Facades\Auth::loginUsingId(1);
+//    return view('chat');
+//});
 Route::middleware('auth:sanctum')->group(function () {
+//    Route::get('/chat', function (\Illuminate\Http\Request $request){
+//          \Illuminate\Support\Facades\Auth::loginUsingId(1);
+//          return view('chat');
+//    });
     Route::post('/current-user', [LoginController::class, 'current_user']);
+    Route::get('/user-list', [LoginController::class, 'all_user_list']);
     Route::prefix('/role')->group(function (){
         Route::put('/',[RoleController::class, 'add']);
         Route::get('/',[RoleController::class, 'index']);
@@ -38,6 +49,11 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/', [FileSystem::class, 'get_files']);
         });
     });
+    Route::prefix('/chat')->group(function(){
+        Route::get('/user-list', [ChatController::class, 'user_list']);
+        Route::get('{reciver_id?}', [ChatController::class, 'index']);
+        Route::post('{reciver_id?}', [ChatController::class, 'store']);
+    });
 });
 
-Route::post('/', [FileSystem::class, 'add_file']);
+//\Illuminate\Support\Facades\Broadcast::routes(['middleware'=>['auth:sanctum']]);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserListResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -65,7 +66,7 @@ class LoginController extends Controller
             $tmp = $image->storeAs('users', $filename, 'public');
             $user->photo = $tmp;
         }
-        $user->role_id = 2;
+        $user->role_id = 1;
         $user->save();
 
         return response()->json([
@@ -78,4 +79,8 @@ class LoginController extends Controller
         $user = User::find($request->user()->id);
         return new UserResource(Auth::user());
     }
+    public function all_user_list(Request $request){
+        return new UserListResource(User::paginate(3));
+    }
 }
+

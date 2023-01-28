@@ -23,7 +23,7 @@ class FileSystem extends Controller
         }
 
         $validate = Validator::make($request->all(), [
-            'level' => 'required|numeric',
+            'parent' => 'required|numeric',
         ]);
         if ($validate->fails()) {
             return response()->json([
@@ -31,7 +31,12 @@ class FileSystem extends Controller
                 'errors' => $validate->errors()
             ], 400);
         }
-        return Folder::where('level', '=', $request->input('level'))->get();
+        $folders = Folder::where('parent', '=', $request->input('parent'))->get();
+        $files = File::where('folder_id', '=', $request->input('parent'))->get();
+        return \response()->json([
+            'folders'=>$folders,
+            'files'=>$files
+        ],200);
     }
 
     public function create_folder(Request $request)
@@ -42,8 +47,9 @@ class FileSystem extends Controller
             ], 403);
         }
         $validate = Validator::make($request->all(), [
-            'level' => 'required|numeric',
-            'name' => 'required|min:2'
+
+            'name' => 'required|min:2',
+            'parent'=>'required|numeric'
         ]);
         if ($validate->fails()) {
             return response()->json([
@@ -52,8 +58,8 @@ class FileSystem extends Controller
             ], 400);
         }
         $folder = new Folder;
-        $folder->level = $request->input('level');
         $folder->name = $request->input('name');
+        $folder->parent = $request->input('parent');
         $folder->save();
         return \response()->json([
             'message' => 'folder create success'
@@ -126,9 +132,9 @@ class FileSystem extends Controller
         }
         $file = $request->file('file') ?? null;
         $f = new File;
-        $filename = time() . '.' . $file->getClientOriginalExtension();
+        $filename = $file->getClientOriginalName().'_'.time() . '.' . $file->getClientOriginalExtension();
         $folder = Folder::find($request->input('folder_id'));
-        $tmp = $file->storeAs('folders/'.$folder->level, $filename, 'public');
+        $tmp = $file->storeAs('folders/'.$folder->name, $filename, 'public');
         $f->file = $tmp;
         $f->name = $file->getClientOriginalName();
         $f->folder_id = $request->input('folder_id');
