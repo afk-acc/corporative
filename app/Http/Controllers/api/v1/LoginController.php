@@ -82,5 +82,62 @@ class LoginController extends Controller
     public function all_user_list(Request $request){
         return new UserListResource(User::paginate(3));
     }
+    public function changeUser(Request $request){
+
+        $validate = Validator::make($request->all(), [
+            'id'=>"required",
+            'email' => 'required|min:2|max:250|unique:users',
+            'name' => 'required|min:2|max:250',
+            'photo' => 'image|size:8192|mimes:jpeg,bmp,png,jpg',
+        ]);
+        if ($validate->fails()) {
+            return response()->json([
+                'message' => 'validation fails',
+                'errors' => $validate->errors()
+            ], 400);
+        }
+        $validate = Validator::make($request->all(), [
+            'id'=>"required",
+            'email' => 'required|min:2|max:250|unique:users',
+            'name' => 'required|min:2|max:250',
+            'photo' => 'image|size:8192|mimes:jpeg,bmp,png,jpg',
+        ]);
+        if ($request->input('password') != null) {
+            $validate = Validator::make($request->all(), [
+                'password' => 'max:64|min:8',
+                'password_confirm' => 'same:password',
+            ]);
+            return response()->json([
+                'message' => 'validation fails',
+                'errors' => $validate->errors()
+            ], 400);
+        }
+
+        $user = User::find($request->input('id'));
+        if(!isset($user)){
+            return response()->json(['message'=>'user not found'],404);
+        }
+        $user->email = $request->input('email');
+        $user->name = $request->input('name');
+        $image = $request->file('photo') ?? null;
+        if ($image) {
+            $filename = time() .'.'.$image->getClientOriginalExtension();
+            $tmp = $image->storeAs('users', $filename, 'public');
+            $user->photo = $tmp;
+        }
+        if($request->input('password') != null){
+            $user->password = Hash::make($request->input('password'));
+        }
+        if($request->user()->hasAccess('user.role.change')){
+            $user->role_id = $request->input('role');
+        }
+        $user->save();
+
+        return response()->json([
+            'message' => 'register is successful'
+        ], 200);
+    }
+
+
 }
 
