@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user-change', [LoginController::class. 'changeUser']);
     Route::post('/current-user', [LoginController::class, 'current_user']);
     Route::get('/user-list', [LoginController::class, 'all_user_list']);
+    Route::delete('/user/{id}', [LoginController::class, 'deleteUser']);
     Route::prefix('/role')->group(function (){
         Route::put('/',[RoleController::class, 'add']);
         Route::get('/',[RoleController::class, 'index']);

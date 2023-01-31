@@ -17,7 +17,7 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 Broadcast::channel('chat.{sender}.{reciver}', function ($user){
-    return true;
+    return !is_null($user);
     //    return !is_null($user);
 });
 //Broadcast::routes(['prefix'=>'api/v1', 'middleware'=>['auth:sanctum']]);

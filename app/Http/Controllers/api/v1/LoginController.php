@@ -49,6 +49,7 @@ class LoginController extends Controller
             'password_confirm' => 'required|same:password',
             'name' => 'required|min:2|max:250',
             'photo' => 'image|size:8192|mimes:jpeg,bmp,png,jpg',
+            'role'=>'required|numeric'
         ]);
         if ($validate->fails()) {
             return response()->json([
@@ -60,13 +61,13 @@ class LoginController extends Controller
         $user->email = $request->input('email');
         $user->password = Hash::make($request->input('password'));
         $user->name = $request->input('name');
+        $user->role_id = $request->input('role');
         $image = $request->file('photo') ?? null;
         if ($image) {
             $filename = time() .'.'.$image->getClientOriginalExtension();
             $tmp = $image->storeAs('users', $filename, 'public');
             $user->photo = $tmp;
         }
-        $user->role_id = 1;
         $user->save();
 
         return response()->json([
@@ -80,7 +81,7 @@ class LoginController extends Controller
         return new UserResource(Auth::user());
     }
     public function all_user_list(Request $request){
-        return new UserListResource(User::paginate(3));
+        return new UserListResource(User::where('name','like', $request->input('query').'%')->paginate($request->input('limit')));
     }
     public function changeUser(Request $request){
 
@@ -136,6 +137,16 @@ class LoginController extends Controller
         return response()->json([
             'message' => 'register is successful'
         ], 200);
+    }
+
+    public function  deleteUser(Request $request, $id){
+        if($request->user()->hasAccess('user.delete')){
+            User::destroy($id);
+            return response()->json([
+                'message'=>'success'
+            ],200);
+        }
+        return response()->json(['message'=>'not permissions'],403);
     }
 
 
