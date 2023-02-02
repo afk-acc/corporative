@@ -19,7 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
 //          \Illuminate\Support\Facades\Auth::loginUsingId(1);
 //          return view('chat');
 //    });
-    Route::post('/user-change', [LoginController::class. 'changeUser']);
+    Route::post('/change-user', [LoginController::class, 'change_user']);
     Route::post('/current-user', [LoginController::class, 'current_user']);
     Route::get('/user-list', [LoginController::class, 'all_user_list']);
     Route::delete('/user/{id}', [LoginController::class, 'deleteUser']);

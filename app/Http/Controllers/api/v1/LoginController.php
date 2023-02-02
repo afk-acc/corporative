@@ -48,7 +48,7 @@ class LoginController extends Controller
             'password' => 'required|max:64|min:8',
             'password_confirm' => 'required|same:password',
             'name' => 'required|min:2|max:250',
-            'photo' => 'image|size:8192|mimes:jpeg,bmp,png,jpg',
+            'photo' => 'image|max:8192|mimes:jpeg,bmp,png,jpg',
             'role'=>'required|numeric'
         ]);
         if ($validate->fails()) {
@@ -83,13 +83,12 @@ class LoginController extends Controller
     public function all_user_list(Request $request){
         return new UserListResource(User::where('name','like', $request->input('query').'%')->paginate($request->input('limit')));
     }
-    public function changeUser(Request $request){
+    public function change_user(Request $request){
 
         $validate = Validator::make($request->all(), [
             'id'=>"required",
-            'email' => 'required|min:2|max:250|unique:users',
             'name' => 'required|min:2|max:250',
-            'photo' => 'image|size:8192|mimes:jpeg,bmp,png,jpg',
+            'photo' => 'image|max:8192|mimes:jpeg,bmp,png,jpg',
         ]);
         if ($validate->fails()) {
             return response()->json([
@@ -97,12 +96,6 @@ class LoginController extends Controller
                 'errors' => $validate->errors()
             ], 400);
         }
-        $validate = Validator::make($request->all(), [
-            'id'=>"required",
-            'email' => 'required|min:2|max:250|unique:users',
-            'name' => 'required|min:2|max:250',
-            'photo' => 'image|size:8192|mimes:jpeg,bmp,png,jpg',
-        ]);
         if ($request->input('password') != null) {
             $validate = Validator::make($request->all(), [
                 'password' => 'max:64|min:8',
@@ -118,7 +111,6 @@ class LoginController extends Controller
         if(!isset($user)){
             return response()->json(['message'=>'user not found'],404);
         }
-        $user->email = $request->input('email');
         $user->name = $request->input('name');
         $image = $request->file('photo') ?? null;
         if ($image) {
